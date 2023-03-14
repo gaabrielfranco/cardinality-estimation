@@ -39,9 +39,8 @@ class HyperLogLog():
         
         hash_x = mmh3.hash(x, signed=False)
 
-        # Here I did the reverse (first p bits from the right are the bucket, the rest I use to compute the leading zeros)
-        bucket = hash_x & (self.m - 1)
-        w = hash_x >> self.p
+        bucket = hash_x >> (32 - self.p)
+        w = hash_x & ((1 << (32 - self.p)) - 1)
 
         #Count the number of leading zeros (considering 32 bits)
         leading_zeros = 32 - self.p - w.bit_length() + 1

@@ -39,6 +39,7 @@ class HyperLogLog():
         
         hash_x = mmh3.hash(x, signed=False)
 
+        # Here I did the reverse (first p bits from the right are the bucket, the rest I use to compute the leading zeros)
         bucket = hash_x & (self.m - 1)
         w = hash_x >> self.p
 

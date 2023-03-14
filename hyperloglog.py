@@ -8,6 +8,10 @@ class LinearCounting():
         self.k = k
     
     def insert(self, x) -> None:
+        # Convert to bytes
+        if isinstance(x, int):
+            x = x.to_bytes((x.bit_length() + 7) // 8, 'little')
+        
         hash_x = mmh3.hash(x, signed=False) % self.k
         self.buckets[hash_x] = 1
 
@@ -67,7 +71,7 @@ random = np.random.RandomState(326178)
 
 # Getting random data
 D = random.randint(0, 10000, size=1000000, dtype=int)
-D = [str(x.item()) for x in D]
+D = [x.item() for x in D]
 
 hll = HyperLogLog(p=16)
 lc = LinearCounting(k=10000)

@@ -1,4 +1,5 @@
 import math
+import intset
 import mmh3
 import numpy as np
 
@@ -18,7 +19,7 @@ class LinearCounting():
     def get_estimate(self) -> int:
         empty_buckets = np.sum(self.buckets == 0)
         if empty_buckets == 0:
-            return # TODO: What to do here?
+            return -1# TODO: What to do here?
         else:
             return int(round(self.k * np.log(self.k / empty_buckets)))
     
@@ -64,22 +65,53 @@ class HyperLogLog():
             return int(round(E))
         else:
             return int(round(-2**32 * np.log(1 - E / 2**32)))
+        
+# Distinct Elements in Streams: An Algorithm for the (Text) Book implementation
+class TextBookEstimation():
+    def __init__(self, eps, delta, m, random_state=None):
+        self.eps = eps
+        self.delta = delta
+        self.m = m
+        self.X = intset.IntSet()
+        self.thresh = 12/(eps**2) * math.log(8*self.m / delta)
+        self.p = 1
+        self.random = np.random.RandomState(random_state)
+
+    def insert(self, x):
+        self.X = self.X.discard(x)
+        if self.random.random() <= self.p:
+            self.X = self.X.insert(x)
+        if self.X.size() > self.thresh:
+            # Throw away each element with probability 1/2
+            for x in self.X:
+                if random.random() <= 0.5:
+                    self.X = self.X.discard(x)
+            self.p /= 2
+
+            if self.X.size() > self.thresh:
+                raise Exception("Error: X.size() > thresh")
+            
+    def get_estimate(self):
+        return self.X.size() / self.p
 
 
 # Testing HyperLogLog
 random = np.random.RandomState(326178)
 
 # Getting random data
-D = random.randint(0, 10000, size=1000000, dtype=int)
+D = random.randint(0, 1000, size=10000, dtype=int)
 D = [x.item() for x in D]
 
 hll = HyperLogLog(p=16)
 lc = LinearCounting(k=10000)
+tbe = TextBookEstimation(eps=0.1, delta=1e-5, m=10000, random_state=326178)
 
 for x in D:
     hll.insert(x)
     lc.insert(x)
+    tbe.insert(x)
 
 print("Estimation (HLL): %d" % hll.get_estimate())
 print("Estimation (LC): %d" % lc.get_estimate())
+print("Estimation (TBE): %d" % tbe.get_estimate())
 print("Real: %d" % len(set(D)))

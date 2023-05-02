@@ -1,8 +1,8 @@
 # Datasets
 vertices.txt.gz
 vertices.txt
-romeu_juliet.txt
 edges.txt
+edges.txt.gz
 
 # MacOS files
 .DS_Store

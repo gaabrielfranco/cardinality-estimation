@@ -7,7 +7,20 @@ from ._constants import raw_estimate_data, bias_data, threshold_data
 from ._base import BaseCardinalityEstimation
 
 class HyperLogLog(BaseCardinalityEstimation):
+    """
+    HyperLogLog algorithm for cardinality estimation.
+    """
     def __init__(self, p, hash="mmh3", random_state=42) -> None:
+        """
+        Parameters
+        ----------
+        p : int
+            Number of bits to use for the buckets. The number of buckets will be 2^p.
+        hash : str, optional
+            Hash function to use. Can be either "mmh3" or "sha256". Defaults to "mmh3".
+        random_state : int, optional
+            Random state for the hash function. Defaults to 42.
+        """
         if p < 4 or p > 16:
             raise ValueError("p must be between 4 and 16")
         self.p = p
@@ -32,6 +45,14 @@ class HyperLogLog(BaseCardinalityEstimation):
             raise ValueError("Unknown hash function")
 
     def insert(self, x) -> None:
+        """
+        Insert an element into the HyperLogLog sketch.
+
+        Parameters
+        ----------
+        x : int or bytes
+            Element to insert. If int, it will be converted to bytes.
+        """
         # Convert to bytes
         if isinstance(x, int):
             x = x.to_bytes((x.bit_length() + 7) // 8, 'little')
@@ -47,6 +68,14 @@ class HyperLogLog(BaseCardinalityEstimation):
         self.buckets[bucket] = max(self.buckets[bucket], leading_zeros)
 
     def get_estimate(self) -> int:
+        """
+        Get the cardinality estimate.
+
+        Returns
+        -------
+        int
+            Cardinality estimate.
+        """
         E = self.alpha * (self.m ** 2 ) / sum(math.pow(2.0, -bucket) for bucket in self.buckets)
         if E <= 2.5 * self.m:
             V = np.sum(self.buckets == 0)
@@ -61,9 +90,25 @@ class HyperLogLog(BaseCardinalityEstimation):
             return int(round(-2**32 * np.log(1 - (E / 2**32))))
         
     def get_size(self) -> int:
+        """
+        Get the size of the sketch in bytes.
+
+        Returns
+        -------
+        int
+            Size of the sketch in bytes.
+        """
         return getsizeof(self.buckets)
     
     def merge(self, hll) -> None:
+        """
+        Merge another HyperLogLog sketch into this one.
+
+        Parameters
+        ----------
+        hll : HyperLogLog
+            HyperLogLog sketch to merge.
+        """
         if self.p != hll.p:
             raise ValueError("p must be the same")
         if self.self.hash_name != hll.self.hash_name:
@@ -72,7 +117,20 @@ class HyperLogLog(BaseCardinalityEstimation):
         self.buckets = np.maximum(self.buckets, hll.buckets)
                
 class HyperLogLogPlusPlus(BaseCardinalityEstimation):
+    """
+    HyperLogLog++ algorithm for cardinality estimation.
+    """
     def __init__(self, p, hash="mmh3",  random_state=42) -> None:
+        """
+        Parameters
+        ----------
+        p : int
+            Number of bits to use for the buckets. The number of buckets will be 2^p.
+        hash : str, optional
+            Hash function to use. Can be either "mmh3" or "sha256". Defaults to "mmh3".
+        random_state : int, optional
+            Random state for the hash function. Defaults to 42.
+        """
         if p < 4 or p > 18:
             raise ValueError("p must be between 4 and 18")
         self.p = p
@@ -97,12 +155,55 @@ class HyperLogLogPlusPlus(BaseCardinalityEstimation):
             raise ValueError("Unknown hash function")
 
     def linear_counting(self, m, V) -> int:
+        """
+        Linear counting algorithm for cardinality estimation.
+
+        Parameters
+        ----------
+        m : int
+            Number of buckets.
+        V : int
+            Number of empty buckets.
+        
+        Returns
+        -------
+        int
+            Cardinality estimate.
+        """
         return int(round(m * np.log(m / V)))
     
     def threshold(self, p) -> int:
+        """
+        Threshold function for bias correction.
+
+        Parameters
+        ----------
+        p : int
+            Number of bits to use for the buckets. The number of buckets will be 2^p.
+        
+        Returns
+        -------
+        int
+            Threshold value.
+        """
         return threshold_data[p-4]
         
     def estimate_bias(self, E, p) -> int:
+        """
+        Estimate the bias for a given cardinality estimate.
+
+        Parameters
+        ----------
+        E : int
+            Cardinality estimate.
+        p : int
+            Number of bits to use for the buckets. The number of buckets will be 2^p.
+        
+        Returns
+        -------
+        int
+            Bias estimate.
+        """
         for pos in range(len(raw_estimate_data[p-4])):
             if raw_estimate_data[p-4][pos] > E:
                 break
@@ -129,6 +230,14 @@ class HyperLogLogPlusPlus(BaseCardinalityEstimation):
         return est_bias
     
     def insert(self, x) -> None:
+        """
+        Insert an element into the HyperLogLog++ sketch.
+
+        Parameters
+        ----------
+        x : int or bytes
+            Element to insert.
+        """
         # Convert to bytes
         if isinstance(x, int):
             x = x.to_bytes((x.bit_length() + 7) // 8, 'little')
@@ -145,6 +254,14 @@ class HyperLogLogPlusPlus(BaseCardinalityEstimation):
 
     
     def get_estimate(self) -> int:
+        """
+        Get the cardinality estimate.
+
+        Returns
+        -------
+        int
+            Cardinality estimate.
+        """
         E = self.alpha * (self.m ** 2 ) / sum(math.pow(2.0, -bucket) for bucket in self.buckets)
 
         # Estimate bias is already estimating the final value instead of returning the bias
@@ -163,9 +280,25 @@ class HyperLogLogPlusPlus(BaseCardinalityEstimation):
             return E_prime
             
     def get_size(self) -> int:
+        """
+        Get the size of the sketch in bytes.
+
+        Returns
+        -------
+        int
+            Size of the sketch in bytes.
+        """
         return getsizeof(self.buckets)
 
     def merge(self, hll) -> None:
+        """
+        Merge another HyperLogLog++ sketch into this one.
+
+        Parameters
+        ----------
+        hll : HyperLogLogPlusPlus
+            Sketch to merge.
+        """
         if self.p != hll.p:
             raise ValueError("p must be the same")
         if self.hash_name != hll.hash_name:

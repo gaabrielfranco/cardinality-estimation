@@ -4,7 +4,20 @@ from ._base import BaseCardinalityEstimation
 import mmh3
 
 class LinearCounting(BaseCardinalityEstimation):
+    """
+    Linear Counting algorithm for cardinality estimation.
+    """
     def __init__(self, k, hash="mmh3", random_state=42) -> None:
+        """
+        Parameters
+        ----------
+        k : int
+            Number of buckets.
+        hash : str, optional
+            Hash function to use. Can be "mmh3" or "sha256".
+        random_state : int, optional
+            Random state for the hash function. Defaults to 42.
+        """
         self.buckets = np.zeros(k, dtype="int8")
         self.k = k
         self.random_state = random_state
@@ -16,6 +29,14 @@ class LinearCounting(BaseCardinalityEstimation):
             raise ValueError("Unknown hash function")
     
     def insert(self, x) -> None:
+        """
+        Insert an element into the sketch.
+
+        Parameters
+        ----------
+        x : int or bytes
+            Element to insert.
+        """
         # Convert to bytes
         if isinstance(x, int):
             x = x.to_bytes((x.bit_length() + 7) // 8, 'little')
@@ -24,8 +45,16 @@ class LinearCounting(BaseCardinalityEstimation):
         self.buckets[hash_x] = 1
 
     def get_estimate(self) -> int:
+        """
+        Get the cardinality estimate.
+
+        Returns
+        -------
+        int
+            Cardinality estimate.
+        """
         empty_buckets = np.sum(self.buckets == 0)
         if empty_buckets == 0:
-            return -1# TODO: What to do here?
+            return -1 # Failure case
         else:
             return int(round(self.k * np.log(self.k / empty_buckets)))

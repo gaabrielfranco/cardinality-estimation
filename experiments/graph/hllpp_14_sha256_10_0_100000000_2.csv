@@ -1,2 +1,2 @@
-n_execution,algorithm,p,hash,n_hlls,real_cardinality,estimated_cardinality,ratio,size,insertion_time_mean,insertion_time_std,estimation_time
-2,hllpp,14,sha256,10,100000000,99427197,0.99427197,131184,0.0013675832748413087,0.0006146852523036363,1.5611648559570312
+n_execution,algorithm,p,hash,n_hlls,real_cardinality,estimated_cardinality,ratio,size,insertion_time_mean,insertion_time_std,estimation_time,eps,delta
+2,hllpp,14,sha256,10,100000000,99427197,0.99427197,131184,0.0013675832748413,0.0006146852523036,1.5611648559570312,,

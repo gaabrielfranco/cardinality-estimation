@@ -71,7 +71,19 @@ To run the experiments, run the following command:
 
 ### Plots
 
-TODO
+To produce the plots for the synthetic experiments, run the following command:
+
+```sh
+python3 plots_synthetic.py
+```
+
+To produce the plots for the graph experiments, run the following command:
+
+```sh
+python3 plots_graph.py
+```
+
+The plots will be saved at ```experiments/synthetic/plots``` and ```experiments/graph/plots``` respectively. 
 
 ## License
 

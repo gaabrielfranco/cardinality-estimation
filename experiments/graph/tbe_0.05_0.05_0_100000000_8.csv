@@ -1,0 +1,2 @@
+n_execution,algorithm,p,hash,n_hlls,real_cardinality,estimated_cardinality,ratio,size,insertion_time_mean,insertion_time_std,estimation_time,eps,delta
+8,tbe,,,,100000000,100147200,1.001472,4194520,0.0005451321601867675,0.0005428459845461679,0.0059604644775390625,0.05,0.05

@@ -85,7 +85,7 @@ df_hll = deepcopy(df[df.method.str.contains("hll")])
 df_hll["method"] = df_hll["method"].apply(lambda x: "HLL++" if x == "hllpp" else "HLL")
 
 # # See difference in ratio per hash function and cardinality
-sns.set_theme(style="whitegrid")
+sns.set_theme(style="whitegrid", font_scale=2)
 g = sns.catplot(x="real_cardinality", y="ratio", hue="hash", col="method", data=df_hll, kind="point", height=5, aspect=2, estimator="mean", errorbar=("ci", 95), capsize=0.1, join=False)
 g.set_xlabels("Cardinality")
 g.set_ylabels("Ratio")

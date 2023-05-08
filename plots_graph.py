@@ -53,7 +53,7 @@ plt.savefig("experiments/graph/plots/ratio_general.pdf", bbox_inches="tight")
 plt.close()
 
 # # Ratio by n_hlls
-sns.set_theme(style="whitegrid")
+sns.set_theme(style="whitegrid", font_scale=2)
 g = sns.catplot(x="p", y="ratio", hue="hash", col="n_hlls", data=df_hll, kind="point", height=5, aspect=2, estimator="mean", errorbar=("ci", 95), capsize=0.1, join=False)
 g.set_xlabels("p")
 g.set_ylabels("Ratio")

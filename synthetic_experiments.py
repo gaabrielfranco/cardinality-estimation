@@ -26,10 +26,6 @@ else:
 
 filename = f"experiments/synthetic/{args.max_range}_{alg_name}.csv"
 
-if os.path.exists(filename):
-    print(f"File {filename} already exists\n")
-    exit()
-
 df = pd.DataFrame(columns=["algorithm", "max_range", "real_cardinality", "estimated_cardinality", "ratio", "size", "insertion_time_mean", "insertion_time_std", "estimation_time"])
 
 random = np.random.RandomState(args.max_range)

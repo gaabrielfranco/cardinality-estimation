@@ -37,10 +37,6 @@ else:
 
 filename = f"experiments/graph/{alg_name}_{args.start}_{args.end}_{args.n_execution}.csv"
 
-if os.path.exists(filename):
-    print(f"File {filename} already exists\n")
-    exit()
-
 if args.algorithm == "hllpp":
     print(f"Algorithm: {args.algorithm}")
     print(f"p: {args.p}")
